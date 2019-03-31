@@ -1,12 +1,9 @@
 #!/bin/bash
 
 name=smc
-dir=packed/
+output=packed/
 temp=temp/
-
-if [ ! -d "$dir" ]; then
-    mkdir $dir
-fi
+declare -a folders=("assets/" "resources/")
 
 # https://stackoverflow.com/a/33826763
 while [[ "$#" > 0 ]]; do case $1 in
@@ -14,6 +11,10 @@ while [[ "$#" > 0 ]]; do case $1 in
     -w|--windows) windows=1;;
     *) echo "Unknown parameter passed: $1"; exit 1;;
 esac; shift; done
+
+if [ ! -d "$output" ]; then
+    mkdir $output
+fi
 
 if [ "$linux" != "1" ] && [ "$windows" != "1" ]; then
     echo "No build options specified"
@@ -26,13 +27,18 @@ if [ "$linux" == "1" ]; then
 
     echo ""
     echo "PACKING LINUX"
-    cp -r assets/ $temp
-    cp -r resources/ $temp
+
+    mkdir $temp/
+    for folder in "${folders[@]}"; do
+        cp -r $folder ${temp}/$folder
+    done
     cp target/release/$name $temp
+
     cd $temp
     zip -r ${name}_linux.zip .
     cd ..
-    mv ${temp}/${name}_linux.zip $dir
+
+    mv ${temp}${name}_linux.zip $output
     rm -r $temp
 
     echo ""
@@ -45,13 +51,18 @@ if [ "$windows" == "1" ]; then
 
     echo ""
     echo "PACKING WINDOWS"
-    cp -r assets/ $temp
-    cp -r resources/ $temp
+
+    mkdir $temp/
+    for folder in "${folders[@]}"; do
+        cp -r $folder ${temp}/$folder
+    done
     cp target/x86_64-pc-windows-gnu/release/$name.exe $temp
+    
     cd $temp
     zip -r ${name}_windows.zip .
     cd ..
-    mv ${temp}/${name}_windows.zip $dir
+
+    mv ${temp}/${name}_windows.zip $output
     rm -r $temp
 
     echo ""
