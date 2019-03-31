@@ -1,0 +1,5 @@
+(
+  fullscreen: true,
+  multisampling: 4,
+  vsync: true,
+)

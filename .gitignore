@@ -1,0 +1,7 @@
+/target
+**/*.rs.bk
+Cargo.lock
+/logs
+latest_log.txt
+/.vscode
+/packed

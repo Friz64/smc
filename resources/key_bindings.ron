@@ -1,0 +1,9 @@
+(
+    axes: {
+        "walk": Emulated(pos: Key(W), neg: Key(S)),
+        "strafe": Emulated(pos: Key(A), neg: Key(D)),
+    },
+    actions: {
+        "pause": [[Key(Escape)]],
+    }
+)
