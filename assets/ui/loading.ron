@@ -1,17 +1,45 @@
 #![enable(implicit_some)]
-Text(
+Container(
     transform: (
-        id: "loading",
-        anchor: Middle,
-        x: 0.0,
-        y: 0.0,
-        width: 200.0,
-        height: 100.0,
+        stretch: XY(x_margin: 0.0, y_margin: 0.0),
     ),
-    text: (
-        text: "Loading",
-        font_size: 80.0,
-        color: (1.0, 1.0, 1.0, 1.0),
-        font: File("font/Oswald-Regular.ttf", Ttf, ()),
+    background: (
+        image: Data(Rgba((0.0, 0.0, 0.0, 1.0), (channel: Srgb))),
     ),
+    children: [
+        Text(
+            transform: (
+                anchor: Middle,
+                x: 0.0,
+                y: 0.0,
+                width: 200.0,
+                height: 100.0,
+            ),
+            text: (
+                text: "Loading",
+                font_size: 80.0,
+                color: (1.0, 1.0, 1.0, 1.0),
+                font: File("font/Oswald-Regular.ttf", Ttf, ()),
+            )
+        ),
+        Custom(
+            LoadingBar(
+                transform: (
+                    id: "progress_bar",
+                    anchor: Middle,
+                    x: 0.0,
+                    y: -80.0,
+                    width: 800.0,
+                    height: 65.0,
+                ),
+                loading_bar: (
+                    background_texture: Data(Rgba((0.2, 0.2, 0.2, 1.0), (channel: Srgb))),
+                    bar_texture: Data(Rgba((1.0, 1.0, 0.0, 1.0), (channel: Srgb))),
+                    progress: 0.1,
+                    font: File("font/Oswald-Regular.ttf", Ttf, ()),
+                    font_size: 80.0,
+                )
+            )
+        )
+    ]
 )

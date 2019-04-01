@@ -3,7 +3,7 @@
 name=smc
 output=packed/
 temp=temp/
-declare -a folders=("assets/" "resources/")
+declare -a folders=("assets/" "config/")
 
 # https://stackoverflow.com/a/33826763
 while [[ "$#" > 0 ]]; do case $1 in

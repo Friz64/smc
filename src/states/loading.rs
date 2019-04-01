@@ -1,31 +1,38 @@
-use crate::{graphics, logger::prelude::*, states::GameplayState};
+use crate::{graphics, logger::prelude::*, states::GameplayState, ui::CustomUi};
 use amethyst::{
     assets::{AssetLoaderSystemData, Completion, ProgressCounter},
-    core::{Transform, specs::Entity},
+    audio::AudioFormat,
+    core::{specs::Entity, Transform},
     prelude::*,
-    renderer::{Material, MaterialDefaults, Mesh, ObjFormat, Texture},
-    ui::UiCreator,
+    renderer::{Material, MaterialDefaults, Mesh, ObjFormat, Texture, TextureFormat},
+    ui::{FontFormat, UiCreator, UiFinder},
 };
 
 pub struct LoadingState {
     progress_counter: ProgressCounter,
-    loading_text: Option<Entity>,
+    loading_gui: Option<Entity>,
+    progress_bar: Option<Entity>,
 }
 
 impl LoadingState {
     pub fn new() -> LoadingState {
         LoadingState {
             progress_counter: ProgressCounter::new(),
-            loading_text: None,
+            loading_gui: None,
+            progress_bar: None,
         }
     }
 }
 
 impl SimpleState for LoadingState {
     fn on_start(&mut self, StateData { world, .. }: StateData<GameData>) {
-        self.loading_text = Some(world.exec(|mut ui_creator: UiCreator| {
-            ui_creator.create("ui/loading.ron", &mut self.progress_counter)
-        }));
+        (*world.write_resource::<amethyst::controls::HideCursor>()).hide = false;
+
+        self.loading_gui = Some(world.exec(
+            |mut ui_creator: UiCreator<'_, AudioFormat, TextureFormat, FontFormat, CustomUi>| {
+                ui_creator.create("ui/loading.ron", &mut self.progress_counter)
+            },
+        ));
 
         {
             let material_defaults = world.read_resource::<MaterialDefaults>().0.clone();
@@ -61,11 +68,29 @@ impl SimpleState for LoadingState {
             Completion::Complete => {
                 info!("Loading finished");
 
-                world.delete_entity(self.loading_text.unwrap()).unwrap();
+                world.delete_entity(self.loading_gui.unwrap()).unwrap();
 
                 Trans::Push(Box::new(GameplayState::new()))
             }
-            Completion::Loading => Trans::None,
+            Completion::Loading => {
+                /*
+                // set loading gui entity, if it's been loaded
+                if self.loading_gui.is_none() {
+                    world.exec(|finder: UiFinder| {
+                        if let Some(entity) = finder.find("loading_bar") {
+                            self.loading_gui = Some(entity)
+                        }
+                    });
+                }
+
+                let mut custom_ui = world.write_storage::<???>();
+                if let Some(loading_gui) = self.loading_gui.and_then(|e| custom_ui.get_mut(e)) {
+                    // ...
+                }
+                */
+
+                Trans::None
+            }
             Completion::Failed => Trans::Quit,
         }
     }

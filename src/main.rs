@@ -1,8 +1,8 @@
 mod graphics;
-//mod input;
 mod logger;
 mod states;
 mod systems;
+mod ui;
 
 use amethyst::{
     controls::{CursorHideSystem, MouseFocusUpdateSystem},
@@ -36,10 +36,10 @@ fn main() {
 
     let root_dir = PathBuf::from(utils::application_root_dir());
     let assets_path = root_dir.join("assets");
-    let resources_path = root_dir.join("resources");
+    let config_path = root_dir.join("config");
 
-    let key_bindings_path = resources_path.join("key_bindings.ron");
-    let display_path = resources_path.join("display.ron");
+    let key_bindings_path = config_path.join("key_bindings.ron");
+    let display_path = config_path.join("display.ron");
 
     let input_bundle = InputBundle::<String, String>::new()
         .with_bindings_from_file(key_bindings_path)

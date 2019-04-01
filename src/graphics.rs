@@ -38,9 +38,8 @@ pub fn initialize_camera(world: &mut World) {
 }
 
 pub fn initialize_light(world: &mut World) {
-    // light
     let light: Light = PointLight {
-        intensity: 3.0,
+        intensity: 10.0,
         color: Rgba::white(),
         radius: 5.0,
         ..Default::default()
