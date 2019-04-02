@@ -12,7 +12,7 @@ Container(
                 anchor: Middle,
                 x: 0.0,
                 y: 0.0,
-                width: 200.0,
+                width: 800.0,
                 height: 100.0,
             ),
             text: (
@@ -35,9 +35,10 @@ Container(
                 loading_bar: (
                     background_texture: Data(Rgba((0.2, 0.2, 0.2, 1.0), (channel: Srgb))),
                     bar_texture: Data(Rgba((1.0, 1.0, 0.0, 1.0), (channel: Srgb))),
-                    progress: 0.1,
+                    progress: 0.0,
                     font: File("font/Oswald-Regular.ttf", Ttf, ()),
-                    font_size: 80.0,
+                    font_color: (0.0, 0.0, 0.0, 1.0),
+                    font_size: 50.0,
                 )
             )
         )

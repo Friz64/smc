@@ -5,14 +5,16 @@ use amethyst::{
     renderer::TextureFormat,
     ui::{FontFormat, ToNativeWidget, UiTransformBuilder, UiWidget},
 };
-use loading_bar::LoadingBar;
+use loading_bar::UiLoadingBar;
 use serde::Deserialize;
+
+pub use loading_bar::update_loading_bar;
 
 #[derive(Clone, Deserialize)]
 pub enum CustomUi {
     LoadingBar {
         transform: UiTransformBuilder,
-        loading_bar: LoadingBar,
+        loading_bar: UiLoadingBar,
     },
 }
 
@@ -30,7 +32,7 @@ impl ToNativeWidget for CustomUi {
             CustomUi::LoadingBar {
                 loading_bar,
                 transform,
-            } => (loading_bar.to_native_widget(transform), ()),
+            } => (loading_bar.native_widget(transform), ()),
         }
     }
 }
