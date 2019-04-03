@@ -91,5 +91,5 @@ pub fn update_loading_bar(
     bar_transform.local_x = (width / 2.0) + (background_transform.local_x + (SPACING / 2.0));
     bar_transform.width = width;
 
-    loading_text.text = format!("{:.2}%", progress);
+    loading_text.text = format!("{}%", (progress * 100.0).round());
 }
