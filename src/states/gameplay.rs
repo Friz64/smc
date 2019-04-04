@@ -1,3 +1,4 @@
+use crate::systems::Gameplay;
 use amethyst::{
     controls::HideCursor,
     core::{shrev::EventChannel, specs::ReaderId},
@@ -21,6 +22,8 @@ impl GameplayState {
 
 impl SimpleState for GameplayState {
     fn on_start(&mut self, StateData { world, .. }: StateData<GameData>) {
+        world.write_resource::<Gameplay>().0 = true;
+
         self.event_reader = Some(
             world
                 .write_resource::<EventChannel<InputEvent<String>>>()

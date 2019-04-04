@@ -16,6 +16,7 @@ use clap::{App, Arg};
 use logger::{prelude::*, Logger, UnwrapLog};
 use states::LoadingState;
 use std::path::PathBuf;
+use systems::Gameplay;
 
 const NAME: &str = env!("CARGO_PKG_NAME");
 const VERSION: &str = env!("CARGO_PKG_VERSION");
@@ -70,7 +71,11 @@ fn main() {
         .and_then(|data| graphics::add_renderer(data, &display_path))
         .unwrap_log("Failed to create Game Data");
 
-    match Application::new(assets_path, LoadingState::new(), game_data) {
+    let application = Application::build(assets_path, LoadingState::new())
+        .map(|app| app.with_resource(Gameplay(false)))
+        .and_then(|app| app.build(game_data));
+
+    match application {
         Ok(mut game) => {
             info!("Starting {} [{}]...", NAME, VERSION);
             game.run();

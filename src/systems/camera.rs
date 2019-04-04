@@ -1,3 +1,4 @@
+use super::Gameplay;
 use amethyst::{
     controls::{HideCursor, WindowFocus},
     core::{
@@ -68,6 +69,7 @@ impl CameraRotation {
 
 impl<'a> System<'a> for CameraRotation {
     type SystemData = (
+        ReadExpect<'a, Gameplay>,
         Read<'a, EventChannel<InputEvent<String>>>,
         WriteStorage<'a, Transform>,
         ReadStorage<'a, Camera>,
@@ -83,9 +85,9 @@ impl<'a> System<'a> for CameraRotation {
         );
     }
 
-    fn run(&mut self, (events, mut transform, camera, focus, hide): Self::SystemData) {
+    fn run(&mut self, (gameplay, events, mut transform, camera, focus, hide): Self::SystemData) {
         for event in events.read(self.event_reader.as_mut().unwrap()) {
-            if focus.is_focused && hide.hide {
+            if focus.is_focused && hide.hide && gameplay.0 {
                 if let InputEvent::MouseMoved { delta_x, delta_y } = *event {
                     for (transform, _) in (&mut transform, &camera).join() {
                         transform.pitch_local((-delta_y as f32 * self.sensitivity_y).to_radians());
@@ -109,6 +111,7 @@ impl CameraMovement {
 
 impl<'a> System<'a> for CameraMovement {
     type SystemData = (
+        ReadExpect<'a, Gameplay>,
         Read<'a, Time>,
         Read<'a, InputHandler<String, String>>,
         WriteStorage<'a, Transform>,
@@ -117,14 +120,19 @@ impl<'a> System<'a> for CameraMovement {
         Read<'a, HideCursor>,
     );
 
-    fn run(&mut self, (time, input_handler, mut transform, camera, focus, hide): Self::SystemData) {
-        let walk = input_handler.axis_value("walk").unwrap() as f32;
-        let strafe = input_handler.axis_value("strafe").unwrap() as f32;
+    fn run(
+        &mut self,
+        (gameplay, time, input_handler, mut transform, camera, focus, hide): Self::SystemData,
+    ) {
+        if gameplay.0 {
+            let walk = input_handler.axis_value("walk").unwrap() as f32;
+            let strafe = input_handler.axis_value("strafe").unwrap() as f32;
 
-        if focus.is_focused && hide.hide {
-            if let Some(dir) = Unit::try_new(Vector3::new(-strafe, 0.0, -walk), 1.0e-6) {
-                for (transform, _) in (&mut transform, &camera).join() {
-                    transform.move_along_local(dir, time.delta_seconds() * self.speed);
+            if focus.is_focused && hide.hide {
+                if let Some(dir) = Unit::try_new(Vector3::new(-strafe, 0.0, -walk), 1.0e-6) {
+                    for (transform, _) in (&mut transform, &camera).join() {
+                        transform.move_along_local(dir, time.delta_seconds() * self.speed);
+                    }
                 }
             }
         }
