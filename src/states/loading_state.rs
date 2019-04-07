@@ -1,17 +1,15 @@
 use crate::{
     ecs::CurrentState,
-    graphics,
     logger::prelude::*,
     states::{GameplayData, MainMenuData, MainMenuState},
     ui::{self, CustomUi},
 };
 use amethyst::{
-    assets::{AssetLoaderSystemData, Completion, Handle, ProgressCounter},
+    assets::{Completion, Handle, ProgressCounter},
     audio::{output, AudioFormat},
-    controls::HideCursor,
-    core::{specs::Entity, transform::components::ParentHierarchy, Transform},
+    core::{specs::Entity, transform::components::ParentHierarchy},
     prelude::*,
-    renderer::{Material, MaterialDefaults, Mesh, ObjFormat, Texture, TextureFormat},
+    renderer::TextureFormat,
     ui::{FontFormat, UiCreator, UiFinder, UiLoader, UiPrefab, UiText, UiTransform},
 };
 

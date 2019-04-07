@@ -1,14 +1,5 @@
-use super::CurrentState;
 use amethyst::{
-    controls::{HideCursor, WindowFocus},
-    core::{
-        nalgebra::{Perspective3, Unit, Vector3},
-        shrev::EventChannel,
-        specs::prelude::*,
-        timing::Time,
-        Transform,
-    },
-    input::{InputEvent, InputHandler},
+    core::{nalgebra::Perspective3, shrev::EventChannel, specs::prelude::*},
     renderer::{Camera, Event, WindowEvent},
 };
 

@@ -2,14 +2,14 @@ use super::CurrentState;
 use amethyst::{
     controls::{HideCursor, WindowFocus},
     core::{
-        nalgebra::{Perspective3, Unit, Vector3},
+        nalgebra::{Unit, Vector3},
         shrev::EventChannel,
         specs::prelude::*,
         timing::Time,
         Transform,
     },
     input::{InputEvent, InputHandler},
-    renderer::{Camera, Event, WindowEvent},
+    renderer::Camera,
 };
 
 pub struct CameraRotation {

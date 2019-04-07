@@ -128,11 +128,7 @@ impl SimpleState for MainMenuState {
         world.delete_entity(self.camera.unwrap()).unwrap();
     }
 
-    fn handle_event(
-        &mut self,
-        StateData { world, .. }: StateData<GameData>,
-        event: StateEvent,
-    ) -> SimpleTrans {
+    fn handle_event(&mut self, _: StateData<GameData>, event: StateEvent) -> SimpleTrans {
         match event {
             StateEvent::Ui(ui_event) => {
                 if ui_event.event_type == UiEventType::ClickStop {

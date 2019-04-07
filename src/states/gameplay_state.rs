@@ -100,7 +100,7 @@ impl SimpleState for GameplayState {
         world.delete_entity(self.camera.unwrap()).unwrap();
     }
 
-    fn update(&mut self, StateData { world, .. }: &mut StateData<GameData>) -> SimpleTrans {
+    fn update(&mut self, _: &mut StateData<GameData>) -> SimpleTrans {
         if self.paused {
             Trans::Pop
         } else {
@@ -113,6 +113,7 @@ impl SimpleState for GameplayState {
 
         for event in event_channel.read(self.event_reader.as_mut().unwrap()) {
             if let InputEvent::ActionPressed(action) = event {
+                #[allow(clippy::single_match)]
                 match &**action {
                     "pause" => self.paused = !self.paused,
                     _ => (),

@@ -1,3 +1,5 @@
+#![allow(clippy::type_complexity)]
+
 mod ecs;
 mod graphics;
 mod logger;
