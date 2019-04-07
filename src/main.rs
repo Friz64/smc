@@ -1,11 +1,13 @@
+mod ecs;
 mod graphics;
 mod logger;
 mod states;
-mod systems;
 mod ui;
 
 use amethyst::{
-    controls::{CursorHideSystem, MouseFocusUpdateSystem},
+    assets::Processor,
+    audio::Source,
+    controls::{CursorHideSystem, HideCursor, MouseFocusUpdateSystem},
     core::TransformBundle,
     input::InputBundle,
     prelude::*,
@@ -13,10 +15,10 @@ use amethyst::{
     utils,
 };
 use clap::{App, Arg};
+use ecs::CurrentState;
 use logger::{prelude::*, Logger, UnwrapLog};
 use states::LoadingState;
 use std::path::PathBuf;
-use systems::Gameplay;
 
 const NAME: &str = env!("CARGO_PKG_NAME");
 const VERSION: &str = env!("CARGO_PKG_VERSION");
@@ -49,30 +51,32 @@ fn main() {
     let game_data = Ok(GameDataBuilder::new())
         .and_then(|data| data.with_bundle(TransformBundle::new()))
         .and_then(|data| data.with_bundle(input_bundle))
+        .map(|data| data.with(Processor::<Source>::new(), "source_processor", &[]))
         .map(|data| data.with(MouseFocusUpdateSystem::new(), "focus", &[]))
         .map(|data| data.with(CursorHideSystem::new(), "cursor_hide", &["focus"]))
-        .map(|data| data.with(systems::CameraAspect::new(), "camera_aspect", &[]))
+        .map(|data| data.with(ecs::mainmenu::MainMenuRotation::new(0.7), "rotates", &[]))
+        .map(|data| data.with(ecs::camera::CameraAspect::new(), "camera_aspect", &[]))
         .map(|data| {
             data.with(
-                systems::CameraMovement::new(3.0),
+                ecs::gameplay::CameraMovement::new(3.0),
                 "camera_movement",
                 &["focus"],
             )
         })
         .map(|data| {
             data.with(
-                systems::CameraRotation::new(0.1, 0.1),
+                ecs::gameplay::CameraRotation::new(0.1, 0.1),
                 "camera_rotation",
                 &["focus"],
             )
         })
-        .map(|data| data.with(systems::UiEventHandler::new(), "ui_event_handler", &[]))
         .and_then(|data| data.with_bundle(UiBundle::<String, String>::new()))
         .and_then(|data| graphics::add_renderer(data, &display_path))
         .unwrap_log("Failed to create Game Data");
 
     let application = Application::build(assets_path, LoadingState::new())
-        .map(|app| app.with_resource(Gameplay(false)))
+        .map(|app| app.with_resource(HideCursor { hide: false }))
+        .map(|app| app.with_resource(CurrentState::Loading))
         .and_then(|app| app.build(game_data));
 
     match application {

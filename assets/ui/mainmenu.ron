@@ -1,0 +1,91 @@
+#![enable(implicit_some)]
+Container(
+    transform: (
+        opaque: false,
+        anchor: TopLeft,
+        x: 540,
+        y: -540,
+        width: 1080,
+        height: 1080,
+    ),
+    background: (
+        image: File("img/background.png", Png, (channel: Srgb)),
+    ),
+    children: [
+        Image(
+            transform: (
+                x: 240,
+                y: -90,
+                width: 424.0,
+                height: 114.0,
+                anchor: TopLeft,
+            ),
+            image: (
+                image: File("img/logo.png", Png, (channel: Srgb)),
+            )
+        ),
+        Button(
+            transform: (
+                id: "play",
+                x: 180.0,
+                y: -220.0,
+                width: 300.0,
+                height: 70.0,
+                anchor: TopLeft,
+                mouse_reactive: true,
+            ),
+            button: (
+                text: "Play",
+                font: File("font/Oswald-Regular.ttf", Ttf, ()),
+                font_size: 50.0,
+                normal_text_color: (1.0, 1.0, 1.0, 1.0),
+                normal_image: Data(Rgba((0.2, 0.2, 0.2, 1.0), (channel: Srgb))),
+                hover_image: Data(Rgba((0.3, 0.3, 0.3, 1.0), (channel: Srgb))),
+                press_image: Data(Rgba((0.2, 0.2, 0.2, 1.0), (channel: Srgb))),
+                hover_sound: File("sound/click1.wav", Wav, ()),
+            )
+        ),
+        Button(
+            transform: (
+                id: "settings",
+                x: 180.0,
+                y: -300.0,
+                width: 300.0,
+                height: 70.0,
+                anchor: TopLeft,
+                mouse_reactive: true,
+            ),
+            button: (
+                text: "Settings",
+                font: File("font/Oswald-Regular.ttf", Ttf, ()),
+                font_size: 50.0,
+                normal_text_color: (1.0, 1.0, 1.0, 1.0),
+                normal_image: Data(Rgba((0.2, 0.2, 0.2, 1.0), (channel: Srgb))),
+                hover_image: Data(Rgba((0.3, 0.3, 0.3, 1.0), (channel: Srgb))),
+                press_image: Data(Rgba((0.2, 0.2, 0.2, 1.0), (channel: Srgb))),
+                hover_sound: File("sound/click1.wav", Wav, ()),
+            )
+        ),
+        Button(
+            transform: (
+                id: "quit",
+                x: 180.0,
+                y: -380.0,
+                width: 300.0,
+                height: 70.0,
+                anchor: TopLeft,
+                mouse_reactive: true,
+            ),
+            button: (
+                text: "Quit",
+                font: File("font/Oswald-Regular.ttf", Ttf, ()),
+                font_size: 50.0,
+                normal_text_color: (1.0, 1.0, 1.0, 1.0),
+                normal_image: Data(Rgba((0.2, 0.2, 0.2, 1.0), (channel: Srgb))),
+                hover_image: Data(Rgba((0.3, 0.3, 0.3, 1.0), (channel: Srgb))),
+                press_image: Data(Rgba((0.2, 0.2, 0.2, 1.0), (channel: Srgb))),
+                hover_sound: File("sound/click1.wav", Wav, ()),
+            )
+        ),
+    ]
+)

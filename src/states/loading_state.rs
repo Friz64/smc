@@ -1,20 +1,25 @@
 use crate::{
+    ecs::CurrentState,
     graphics,
     logger::prelude::*,
-    states::GameplayState,
+    states::{GameplayData, MainMenuData, MainMenuState},
     ui::{self, CustomUi},
 };
 use amethyst::{
-    assets::{AssetLoaderSystemData, Completion, ProgressCounter},
-    audio::AudioFormat,
+    assets::{AssetLoaderSystemData, Completion, Handle, ProgressCounter},
+    audio::{output, AudioFormat},
+    controls::HideCursor,
     core::{specs::Entity, transform::components::ParentHierarchy, Transform},
     prelude::*,
     renderer::{Material, MaterialDefaults, Mesh, ObjFormat, Texture, TextureFormat},
-    ui::{FontFormat, UiCreator, UiFinder, UiText, UiTransform},
+    ui::{FontFormat, UiCreator, UiFinder, UiLoader, UiPrefab, UiText, UiTransform},
 };
 
 pub struct LoadingState {
     progress_counter: ProgressCounter,
+    gameplay_data: Option<GameplayData>,
+    mainmenu_data: Option<MainMenuData>,
+    mainmenu_gui: Option<Handle<UiPrefab>>,
     loading_gui: Option<Entity>,
     progress_bar: Option<Entity>,
 }
@@ -23,6 +28,9 @@ impl LoadingState {
     pub fn new() -> LoadingState {
         LoadingState {
             progress_counter: ProgressCounter::new(),
+            gameplay_data: None,
+            mainmenu_data: None,
+            mainmenu_gui: None,
             loading_gui: None,
             progress_bar: None,
         }
@@ -31,49 +39,28 @@ impl LoadingState {
 
 impl SimpleState for LoadingState {
     fn on_start(&mut self, StateData { world, .. }: StateData<GameData>) {
+        *world.write_resource::<CurrentState>() = CurrentState::Loading;
+
+        output::init_output(&mut world.res);
+
+        self.mainmenu_gui = Some(world.exec(
+            |ui_loader: UiLoader<'_, AudioFormat, TextureFormat, FontFormat, CustomUi>| {
+                ui_loader.load("ui/mainmenu.ron", &mut self.progress_counter)
+            },
+        ));
+
         self.loading_gui = Some(world.exec(
             |mut ui_creator: UiCreator<'_, AudioFormat, TextureFormat, FontFormat, CustomUi>| {
                 ui_creator.create("ui/loading.ron", &mut self.progress_counter)
             },
         ));
 
-        let material_defaults = world.read_resource::<MaterialDefaults>().0.clone();
-        let material = world.exec(|loader: AssetLoaderSystemData<Texture>| Material {
-            albedo: loader.load_from_data([0.0, 0.0, 1.0, 1.0].into(), &mut self.progress_counter),
-            ..material_defaults
-        });
-        let mesh = world.exec(|loader: AssetLoaderSystemData<Mesh>| {
-            loader.load(
-                "mesh/suzanne.obj",
-                ObjFormat,
-                (),
-                &mut self.progress_counter,
-            )
-        });
-        let transform = Transform::default();
+        self.gameplay_data = Some(GameplayData::load(world, &mut self.progress_counter));
+        self.mainmenu_data = Some(MainMenuData::load(world, &mut self.progress_counter));
+    }
 
-        // fake loading test
-        {
-            for i in 0..100 {
-                use amethyst::assets::{Progress, Tracker};
-                (&mut self.progress_counter).add_assets(1);
-                let tracker = Box::new(self.progress_counter.create_tracker());
-                std::thread::spawn(move || {
-                    std::thread::sleep(std::time::Duration::from_millis(i * 20));
-                    tracker.success();
-                });
-            }
-        }
-
-        world
-            .create_entity()
-            .with(material)
-            .with(mesh)
-            .with(transform)
-            .build();
-
-        graphics::initialize_light(world);
-        graphics::initialize_camera(world);
+    fn on_stop(&mut self, StateData { world, .. }: StateData<GameData>) {
+        world.delete_entity(self.loading_gui.unwrap()).unwrap();
     }
 
     fn update(&mut self, StateData { world, .. }: &mut StateData<GameData>) -> SimpleTrans {
@@ -81,9 +68,11 @@ impl SimpleState for LoadingState {
             Completion::Complete => {
                 info!("Loading finished");
 
-                world.delete_entity(self.loading_gui.unwrap()).unwrap();
-
-                Trans::Push(Box::new(GameplayState::new()))
+                Trans::Switch(Box::new(MainMenuState::new(
+                    self.mainmenu_gui.as_ref().unwrap().clone(),
+                    self.mainmenu_data.as_ref().unwrap().clone(),
+                    self.gameplay_data.as_ref().unwrap().clone(),
+                )))
             }
             Completion::Loading => {
                 if let Some(progress_bar) = self.progress_bar {

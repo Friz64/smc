@@ -1,9 +1,8 @@
-use super::Gameplay;
+use super::CurrentState;
 use amethyst::{
     controls::{HideCursor, WindowFocus},
     core::{
-        nalgebra::Perspective3,
-        nalgebra::{Unit, Vector3},
+        nalgebra::{Perspective3, Unit, Vector3},
         shrev::EventChannel,
         specs::prelude::*,
         timing::Time,
@@ -12,44 +11,6 @@ use amethyst::{
     input::{InputEvent, InputHandler},
     renderer::{Camera, Event, WindowEvent},
 };
-
-// Updates the Camera with a new Projection Matrix to fit the Screen
-pub struct CameraAspect {
-    event_reader: Option<ReaderId<Event>>,
-}
-
-impl CameraAspect {
-    pub fn new() -> Self {
-        CameraAspect { event_reader: None }
-    }
-}
-
-impl<'a> System<'a> for CameraAspect {
-    type SystemData = (WriteStorage<'a, Camera>, Read<'a, EventChannel<Event>>);
-
-    fn setup(&mut self, res: &mut Resources) {
-        Self::SystemData::setup(res);
-        self.event_reader = Some(res.fetch_mut::<EventChannel<Event>>().register_reader());
-    }
-
-    fn run(&mut self, (mut cameras, event_channel): Self::SystemData) {
-        for event in event_channel.read(self.event_reader.as_mut().unwrap()) {
-            if let Event::WindowEvent {
-                event: WindowEvent::Resized(size),
-                ..
-            } = event
-            {
-                let (width, height): (u32, u32) = (*size).into();
-                for camera in (&mut cameras).join() {
-                    let mut projection = Perspective3::from_matrix_unchecked(camera.proj);
-                    projection.set_aspect(width as f32 / height as f32);
-
-                    camera.proj = projection.to_homogeneous();
-                }
-            }
-        }
-    }
-}
 
 pub struct CameraRotation {
     event_reader: Option<ReaderId<InputEvent<String>>>,
@@ -69,7 +30,7 @@ impl CameraRotation {
 
 impl<'a> System<'a> for CameraRotation {
     type SystemData = (
-        ReadExpect<'a, Gameplay>,
+        ReadExpect<'a, CurrentState>,
         Read<'a, EventChannel<InputEvent<String>>>,
         WriteStorage<'a, Transform>,
         ReadStorage<'a, Camera>,
@@ -85,9 +46,9 @@ impl<'a> System<'a> for CameraRotation {
         );
     }
 
-    fn run(&mut self, (gameplay, events, mut transform, camera, focus, hide): Self::SystemData) {
+    fn run(&mut self, (cur_state, events, mut transform, camera, focus, hide): Self::SystemData) {
         for event in events.read(self.event_reader.as_mut().unwrap()) {
-            if focus.is_focused && hide.hide && gameplay.0 {
+            if focus.is_focused && hide.hide && *cur_state == CurrentState::Gameplay {
                 if let InputEvent::MouseMoved { delta_x, delta_y } = *event {
                     for (transform, _) in (&mut transform, &camera).join() {
                         transform.pitch_local((-delta_y as f32 * self.sensitivity_y).to_radians());
@@ -111,7 +72,7 @@ impl CameraMovement {
 
 impl<'a> System<'a> for CameraMovement {
     type SystemData = (
-        ReadExpect<'a, Gameplay>,
+        ReadExpect<'a, CurrentState>,
         Read<'a, Time>,
         Read<'a, InputHandler<String, String>>,
         WriteStorage<'a, Transform>,
@@ -122,9 +83,9 @@ impl<'a> System<'a> for CameraMovement {
 
     fn run(
         &mut self,
-        (gameplay, time, input_handler, mut transform, camera, focus, hide): Self::SystemData,
+        (cur_state, time, input_handler, mut transform, camera, focus, hide): Self::SystemData,
     ) {
-        if gameplay.0 {
+        if *cur_state == CurrentState::Gameplay {
             let walk = input_handler.axis_value("walk").unwrap() as f32;
             let strafe = input_handler.axis_value("strafe").unwrap() as f32;
 

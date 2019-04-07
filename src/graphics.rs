@@ -7,7 +7,7 @@ use amethyst::{
     prelude::*,
     renderer::{
         Camera, DisplayConfig, DrawShaded, Light, Pipeline, PointLight, PosNormTex, RenderBundle,
-        Rgba, Stage,
+        Rgba, ScreenDimensions, Stage,
     },
     ui::DrawUi,
 };
@@ -17,27 +17,16 @@ use std::path::PathBuf;
 const INIT_WIDTH: u32 = 1280;
 const INIT_HEIGHT: u32 = 720;
 
-pub fn initialize_camera(world: &mut World) {
-    let transform = Transform::new(
-        Translation3::new(0.0, 0.0, -4.0),
-        UnitQuaternion::from_quaternion(Quaternion::new(0.0, 0.0, 1.0, 0.0)),
-        Vector3::new(1.0, 1.0, 1.0),
-    );
-
+pub fn initialize_camera(world: &mut World, transform: Transform) -> Entity {
+    let aspect = world.read_resource::<ScreenDimensions>().aspect_ratio();
     let camera = Camera {
-        proj: Perspective3::new(
-            INIT_WIDTH as f32 / INIT_HEIGHT as f32,
-            45.0f32.to_radians(),
-            0.1,
-            2000.0,
-        )
-        .to_homogeneous(),
+        proj: Perspective3::new(aspect, 45.0f32.to_radians(), 0.1, 2000.0).to_homogeneous(),
     };
 
-    world.create_entity().with(transform).with(camera).build();
+    world.create_entity().with(transform).with(camera).build()
 }
 
-pub fn initialize_light(world: &mut World) {
+pub fn initialize_light(world: &mut World) -> Entity {
     let light: Light = PointLight {
         intensity: 10.0,
         color: Rgba::white(),
@@ -52,7 +41,7 @@ pub fn initialize_light(world: &mut World) {
         Vector3::new(1.0, 1.0, 1.0),
     );
 
-    world.create_entity().with(light).with(transform).build();
+    world.create_entity().with(light).with(transform).build()
 }
 
 pub fn add_renderer<'a, 'b>(
@@ -61,7 +50,9 @@ pub fn add_renderer<'a, 'b>(
 ) -> amethyst::Result<GameDataBuilder<'a, 'b>> {
     let mut display_config = DisplayConfig::load(resources_path);
     display_config.title = crate::NAME.into();
-    display_config.dimensions = Some((INIT_WIDTH, INIT_HEIGHT));
+    if !display_config.fullscreen {
+        display_config.dimensions = Some((INIT_WIDTH, INIT_HEIGHT));
+    }
 
     let pipeline = Pipeline::build().with_stage(
         Stage::with_backbuffer()
